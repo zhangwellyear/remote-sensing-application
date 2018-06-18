@@ -25,6 +25,7 @@ def registration(img_src, img_des):
 	search_params = dict(checks = 50)
 	flann = cv2.FlannBasedMatcher(index_params, search_params)
 	matches = flann.knnMatch(src_des, dst_des, k=2)
+	print('matches finished!')
 
 	# 存储匹配好的点
 	good = []
@@ -41,6 +42,7 @@ def registration(img_src, img_des):
 	else:
 	    print("Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT))
 	    matchesMask = None
+	print('good matches done!')
 
 	# 找到仿射变换系数
 	h, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC)

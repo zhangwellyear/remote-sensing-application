@@ -1,0 +1,20 @@
+ENVI
+description = {
+  Applied Mask Result [Sat Jun 16 09:28:18 2018]}
+samples = 5624
+lines   = 1128
+bands   = 3
+header offset = 0
+file type = ENVI Standard
+data type = 1
+interleave = bsq
+sensor type = Unknown
+byte order = 0
+x start = 10
+y start = 1358
+map info = {Geographic Lat/Lon, 1.0000, 1.0000, 102.74499743, 25.31422834, 2.4830000000e-005, 2.2570000000e-005, WGS-84, units=Degrees}
+coordinate system string = {GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]}
+wavelength units = Unknown
+data ignore value = 0
+band names = {
+ ROI Mask (R:02-b.img), ROI Mask (G:02-b.img), ROI Mask (B:02-b.img)}

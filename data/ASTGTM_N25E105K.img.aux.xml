@@ -1,0 +1,23 @@
+<PAMDataset>
+  <Metadata domain="Esri">
+    <MDI key="PyramidResamplingType">NEAREST</MDI>
+  </Metadata>
+  <PAMRasterBand band="1">
+    <Description>Band_1</Description>
+    <Metadata domain="IMAGE_STRUCTURE">
+      <MDI key="COMPRESSION">RLE</MDI>
+    </Metadata>
+    <Metadata>
+      <MDI key="LAYER_TYPE">athematic</MDI>
+      <MDI key="STATISTICS_EXCLUDEDVALUES">0</MDI>
+      <MDI key="STATISTICS_MAXIMUM">2007</MDI>
+      <MDI key="STATISTICS_MEAN">1175.2444130354</MDI>
+      <MDI key="STATISTICS_MEDIAN">1235</MDI>
+      <MDI key="STATISTICS_MINIMUM">203</MDI>
+      <MDI key="STATISTICS_MODE">1369</MDI>
+      <MDI key="STATISTICS_SKIPFACTORX">1</MDI>
+      <MDI key="STATISTICS_SKIPFACTORY">1</MDI>
+      <MDI key="STATISTICS_STDDEV">314.25370957279</MDI>
+    </Metadata>
+  </PAMRasterBand>
+</PAMDataset>

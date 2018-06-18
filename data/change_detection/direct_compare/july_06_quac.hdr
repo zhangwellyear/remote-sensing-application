@@ -1,0 +1,26 @@
+ENVI
+description = {
+  QUick Atmospheric Correction Result [Mon Jun 22 13:45:46 2009]}
+samples = 2000
+lines   = 2000
+bands   = 6
+header offset = 0
+file type = ENVI Standard
+data type = 2
+interleave = bsq
+sensor type = Landsat TM
+byte order = 0
+x start = 2353
+y start = 4261
+map info = {UTM, 1.000, 1.000, 584145.000, 9016815.000, 3.0000000000e+001, 3.0000000000e+001, 20, South, WGS-84, units=Meters}
+wavelength units = Micrometers
+reflectance scale factor = 10000.000000
+band names = {
+ QUAC (Resize (TM Cal (TM Meta (Band 1):L5231066_06620060716_MTL.txt):july_06_TOA.img):july_06_TOA_sub.img), 
+ QUAC (Resize (TM Cal (TM Meta (Band 2):L5231066_06620060716_MTL.txt):july_06_TOA.img):july_06_TOA_sub.img), 
+ QUAC (Resize (TM Cal (TM Meta (Band 3):L5231066_06620060716_MTL.txt):july_06_TOA.img):july_06_TOA_sub.img), 
+ QUAC (Resize (TM Cal (TM Meta (Band 4):L5231066_06620060716_MTL.txt):july_06_TOA.img):july_06_TOA_sub.img), 
+ QUAC (Resize (TM Cal (TM Meta (Band 5):L5231066_06620060716_MTL.txt):july_06_TOA.img):july_06_TOA_sub.img), 
+ QUAC (Resize (TM Cal (TM Meta (Band 7):L5231066_06620060716_MTL.txt):july_06_TOA.img):july_06_TOA_sub.img)}
+wavelength = {
+ 0.485000, 0.560000, 0.660000, 0.830000, 1.650000, 2.220000}

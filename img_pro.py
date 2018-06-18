@@ -1,9 +1,10 @@
 from PyQt5.QtCore import QDir, Qt
-from PyQt5.QtGui import QImage, QPainter, QPalette, QPixmap
+from PyQt5.QtGui import QImage, QPainter, QPalette, QPixmap, QColor
 from PyQt5.QtWidgets import (QAction, QApplication, QFileDialog, QLabel,
         QMainWindow, QMenu, QMessageBox, QScrollArea, QSizePolicy)
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PIL import Image
+from qtuse import array_to_qimage
 
 # from rs_data_pro import *
 import rs_data_pro
@@ -11,10 +12,15 @@ import classify
 import registration
 import detect_change
 import dem_pro
+import radiation_correction
 
 class RsPro(QMainWindow):
 	def __init__(self):
 		super(RsPro, self).__init__()
+
+		# 鼠标的位置
+		self.pos1 = [0,0]
+		self.pos2 = [0,0]
 
 		self.printer = QPrinter()
 		self.scaleFactor = 0.0
@@ -32,23 +38,66 @@ class RsPro(QMainWindow):
 		self.createActions()
 		self.createMenus()
 
-		self.setWindowTitle("Image View")
-		self.resize(800, 640)
+		self.setWindowTitle("遥感图像处理App")
+		self.resize(640, 800)
+		self.show()
+
+	# 绘制矩形
+	def paintEvent(self, event):
+		width = self.pos2[0]-self.pos1[0]
+		height = self.pos2[1] - self.pos1[1]     
+
+		qp = QPainter()
+		qp.begin(self) 
+		# qp.setPen(QColor(168, 34, 3))
+		qp.drawRect(self.pos1[0], self.pos1[1], width, height)
+		qp.fillRect(self.pos1[0], self.pos1[1], width, height, QColor(168, 34, 3))       
+		qp.end()
+
+	# 处理鼠标点击事件
+	# 鼠标点击
+	def mousePressEvent(self, event):
+		self.pos1[0], self.pos1[1] = event.pos().x(), event.pos().y()
+		print(self.pos1[0], ' ', self.pos1[1])
+
+	# 鼠标释放
+	def mouseReleaseEvent(self, event):
+		self.pos2[0], self.pos2[1] = event.pos().x(), event.pos().y()
+		print(self.pos2[0], ' ', self.pos2[1])
+		self.update()
 
 	def open_img(self):
-		filename = QFileDialog.getOpenFileName(self, "Open Img", QDir.currentPath())
+		filename = QFileDialog.getOpenFileName(self, "打开图片", QDir.currentPath())
 
 		# read color image
 		self.img = Image.open(filename)
 
+	def display_data(self):
+		image = array_to_qimage(self.rs_data_array)
+		if image.isNull():
+			QMessageBox.information(self, "Image Viewer",
+			        "Cannot load %s." % fileName)
+			return
+
+		self.imageLabel.setPixmap(QPixmap.fromImage(image))
+		self.scaleFactor = 1.0
+
+		self.printAct.setEnabled(True)
+		self.fitToWindowAct.setEnabled(True)
+		self.updateActions()
+
+		if not self.fitToWindowAct.isChecked():
+		    self.imageLabel.adjustSize()
+
 	# read remote sensing image
 	def open_rs_data(self):
-		filename = QFileDialog.getOpenFileName(self, "Open RS Data", QDir.currentPath())
+		filename = QFileDialog.getOpenFileName(self, "打开遥感图像", QDir.currentPath())
 		print(filename)
 		# read rs data
 		self.dataset = rs_data_pro.read_as_dataset(filename[0])
 		# read image data as array
 		self.rs_data_array = rs_data_pro.read_as_tuple_floats(self.dataset)
+		self.display_data()
 
 	def rsview(self):		
 		# display the data have been read
@@ -80,25 +129,27 @@ class RsPro(QMainWindow):
 
 	def createMenus(self):
 		#------------------------add menu-------------------------------------
-		self.fileMenu = QMenu("&File", self)
-		self.rsView = QMenu("&ImageView", self)
-		self.imgPro = QMenu("&ImageProcess", self)
+		self.fileMenu = QMenu("&文件", self)
+		self.rsView = QMenu("&图像显示", self)
+		self.imgPro = QMenu("&图像处理", self)
 
-		self.smooth = QMenu("&Smooth", self)
-		self.sharpen = QMenu("&Sharpen", self)
+		self.smooth = QMenu("&平滑", self)
+		self.sharpen = QMenu("&锐化", self)
 
 		# create menu for dem data process
-		self.dem = QMenu("&Dem", self)
+		self.dem = QMenu("&地形", self)
 
 		# create classify menu
-		self.classify = QMenu("&Classify", self)
+		self.classify = QMenu("&分类", self)
 
 		# create registration menu
-		self.registration = QMenu("&Registration", self)
+		self.registration = QMenu("&空间配准", self)
+
+		# create radiate correction menu
+		self.rd_crr = QMenu("&辐射校正", self)
 
 		# create change detection menu
-		self.change_detect = QMenu("&ChangeDetect", self)
-
+		self.change_detect = QMenu("&变化检测", self)
 		#------------------------add actions----------------------------------
 		# add actions for file operate
 		self.fileMenu.addAction(self.openAct)
@@ -128,14 +179,13 @@ class RsPro(QMainWindow):
 		# add action for registration
 		self.registration.addAction(self.regist)
 
+		# 为辐射校正添加响应函数
+		self.rd_crr.addAction(self.radi_corr)
+
 		#--------------------------- detect change --------------------------
 		# add action for change detection
 		self.change_detect.addAction(self.detectAct)
 		self.change_detect.addAction(self.cla_detectAct)
-		#--------------------------------------------------------------------
-
-		#----------------------------- 辐射校正 ------------------------------
-		self.
 		#--------------------------------------------------------------------
 
 		#----------------------------add action end--------------------------
@@ -149,12 +199,13 @@ class RsPro(QMainWindow):
 		self.menuBar().addMenu(self.dem)
 		self.menuBar().addMenu(self.classify)
 		self.menuBar().addMenu(self.registration)
+		self.menuBar().addMenu(self.rd_crr)
 		self.menuBar().addMenu(self.change_detect)
 		#--------------------------------end---------------------------------
 
 	def createActions(self):
 		#----------------------------------------------------basic operation---------------------------------------------------------------
-		self.openAct = QAction("&Open...", self, shortcut="Ctrl+O", triggered=self.open_rs_data)
+		self.openAct = QAction("&打开遥感图像", self, shortcut="Ctrl+O", triggered=self.open_rs_data)
 		self.openColorImg = QAction("Image Open...", self, shortcut="Ctrl+I", triggered=self.open_img)
 		self.printAct = QAction("&Print...", self, shortcut="Ctrl+P", triggered=self.print_)
 		self.fitToWindowAct = QAction("&Fit to Window", self, shortcut="Ctrl+F", enabled=False, checkable=True, triggered=self.fitToWindow)
@@ -181,14 +232,17 @@ class RsPro(QMainWindow):
 
 		#------------------------------------------- classify pro -------------------------------------------------------
 		# classify data
-		self.openClDataAct = QAction("Open", self, triggered=self.open_classify_data)
-		self.isodataAct = QAction("isodata", self, triggered=self.isodata)
+		self.openClDataAct = QAction("打开待分类文件", self, triggered=self.open_classify_data)
+		self.isodataAct = QAction("isodata分类", self, triggered=self.isodata)
 		self.kMeansAct = QAction("k均值", self, triggered=self.kmeans)
 		self.kNearAct = QAction("k近邻", self, triggered=self.knear)
 		#----------------------------------------------------------------------------------------------------------------
 
 		# registration
-		self.regist = QAction("registration", self, triggered=self.registing)
+		self.regist = QAction("配准", self, triggered=self.registing)
+
+		# 辐射校正
+		self.radi_corr = QAction("直方图匹配法", self, triggered=self.hist_match)
 
 		#---------------------------------------- change detection ------------------------------------------------------
 		# change detection
@@ -251,10 +305,16 @@ class RsPro(QMainWindow):
 
 	# registration for the data
 	def registing(self):
-		filename_res = QFileDialog.getOpenFileName(self, "Open Img1", QDir.currentPath())
-		filename_des = QFileDialog.getOpenFileName(self, "Open Img2", QDir.currentPath())
+		filename_res = QFileDialog.getOpenFileName(self, "打开基准影像", QDir.currentPath())
+		filename_des = QFileDialog.getOpenFileName(self, "打开匹配影像", QDir.currentPath())
 		# registration function
 		registration.registration(filename_res, filename_des)
+
+	# 直方图匹配法的辐射校正
+	def hist_match(self):
+		filename_source = QFileDialog.getOpenFileName(self, "打开待匹配的文件", QDir.currentPath())
+		filename_template = QFileDialog.getOpenFileName(self, "打开模板文件", QDir.currentPath())
+		radiation_correction.hist_match(filename_source, filename_template)
 
 	#------------------------------------------------------ change detect ---------------------------------------------------------------
 	def detectChange(self):

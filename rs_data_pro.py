@@ -1,4 +1,5 @@
 from PyQt5.QtGui import QImage
+from PyQt5.QtWidgets import QMessageBox
 from PIL import Image
 from osgeo import osr
 
